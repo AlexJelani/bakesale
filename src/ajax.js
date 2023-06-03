@@ -6,7 +6,7 @@ export default {
       const response = await fetch(apiHost + '/api/deals');
       const responseJson = await response.json();
       return responseJson;
-    } catch (error) {
+    } catch(error) {
       console.error(error);
     }
   },
@@ -15,12 +15,19 @@ export default {
       const response = await fetch(apiHost + '/api/deals/' + dealId);
       const responseJson = await response.json();
       return responseJson;
-    } catch (error) {
+    } catch(error) {
       console.error(error);
     }
-  
+  },
+  async fetchDealSearchResults(searchTerm) {
+    try {
+      const response = await fetch(apiHost + '/api/deals?searchTerm=' + searchTerm);
+      const responseJson = await response.json();
+      return responseJson;
+    } catch(error) {
+      console.error(error);
+    }
   }
-
 };
   
 

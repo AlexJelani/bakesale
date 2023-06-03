@@ -11,12 +11,14 @@
     "expo": "~47.0.14",
     "expo-constants": "~14.0.2",
     "expo-status-bar": "~1.4.2",
+    "lodash.debounce": "^4.0.8",
     "react": "18.1.0",
     "react-native": "0.70.8",
     "react-native-paper": "4.9.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "eslint": "^8.41.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.8.0",
