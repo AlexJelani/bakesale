@@ -1,9 +1,12 @@
 import React from 'react';
 import {
   Animated,
+  Button,
   Dimensions,
   Image,
+  Linking,
   PanResponder,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,17 +26,43 @@ class DealDetail extends React.Component {
       this.imageXPos.setValue(gs.dx);
     },
     onPanResponderRelease: (evt, gs) => {
-      const width = Dimensions.get('window').width;
-      if (Math.abs(gs.dx) > width * 0.4) {
+      this.width = Dimensions.get('window').width;
+      if (Math.abs(gs.dx) > this.width * 0.4) {
         const direction = Math.sign(gs.dx);
         // -1 for left, 1 for right
         Animated.timing(this.imageXPos, {
-          toValue: direction * width,
+          toValue: direction * this.width,
           duration: 250,
+        }).start(() => this.handleSwipe(-1 * direction));
+      } else {
+        Animated.spring(this.imageXPos, {
+          toValue: 0,
         }).start();
       }
     },
   });
+
+  handleSwipe = (indexDirection) => {
+    if (!this.state.deal.media[this.state.imageIndex + indexDirection]) {
+      Animated.spring(this.imageXPos, {
+        toValue: 0,
+      }).start();
+      return;
+    }
+    this.setState(
+      (prevState) => ({
+        imageIndex: prevState.imageIndex + indexDirection,
+      }),
+      () => {
+        // Next image animation
+        this.imageXPos.setValue(indexDirection * this.width);
+        Animated.spring(this.imageXPos, {
+          toValue: 0,
+        }).start();
+      }
+    );
+  };
+
   static propTypes = {
     initialDealData: PropTypes.object.isRequired,
     onBack: PropTypes.func.isRequired,
@@ -48,6 +77,9 @@ class DealDetail extends React.Component {
       deal: fullDeal,
     });
   }
+  openDealUrl = () => {
+    Linking.openURL(this.state.deal.url);
+  };
   render() {
     const { deal } = this.state;
     return (
@@ -60,10 +92,10 @@ class DealDetail extends React.Component {
           source={{ uri: deal.media[this.state.imageIndex] }}
           style={[{ left: this.imageXPos }, styles.image]}
         />
-        <View style={styles.detail}>
-          <View>
-            <Text style={styles.title}>{deal.title}</Text>
-          </View>
+        <View>
+          <Text style={styles.title}>{deal.title}</Text>
+        </View>
+        <ScrollView style={styles.detail}>
           <View style={styles.footer}>
             <View style={styles.info}>
               <Text style={styles.price}>{priceDisplay(deal.price)}</Text>
@@ -79,13 +111,17 @@ class DealDetail extends React.Component {
           <View style={styles.description}>
             <Text>{deal.description}</Text>
           </View>
-        </View>
+          <Button title="Buy this deal!" onPress={this.openDealUrl} />
+        </ScrollView>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  deal: {
+    marginBottom: 20,
+  },
   backLink: {
     marginBottom: 5,
     color: '#22f',

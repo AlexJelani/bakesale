@@ -6,61 +6,51 @@ import DealDetail from './src/components/DealDetail';
 import DealList from './src/components/DealList';
 import SearchBar from './src/components/SearchBar';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.titleXPos = new Animated.Value(0);
-    this.state = {
-      deals: [],
-      dealsFromSearch: [],
-      currentDealId: null,
-    };
-  }
-
+class App extends React.Component {
+  titleXPos = new Animated.Value(0);
+  state = {
+    deals: [],
+    dealsFromSearch: [],
+    currentDealId: null,
+    activeSearchTerm: '',
+  };
   animateTitle = (direction = 1) => {
     const width = Dimensions.get('window').width - 150;
     Animated.timing(this.titleXPos, {
       toValue: direction * (width / 2),
       duration: 1000,
       easing: Easing.ease,
-      useNativeDriver: true,
     }).start(({ finished }) => {
       if (finished) {
         this.animateTitle(-1 * direction);
       }
     });
   };
-
   async componentDidMount() {
     this.animateTitle();
     const deals = await ajax.fetchInitialDeals();
     this.setState({ deals });
   }
-
   searchDeals = async (searchTerm) => {
     let dealsFromSearch = [];
     if (searchTerm) {
       dealsFromSearch = await ajax.fetchDealSearchResults(searchTerm);
     }
-    this.setState({ dealsFromSearch });
+    this.setState({ dealsFromSearch, activeSearchTerm: searchTerm });
   };
-
   setCurrentDeal = (dealId) => {
     this.setState({
       currentDealId: dealId,
     });
   };
-
   unsetCurrentDeal = () => {
     this.setState({
       currentDealId: null,
     });
   };
-
   currentDeal = () => {
     return this.state.deals.find((deal) => deal.key === this.state.currentDealId);
   };
-
   render() {
     if (this.state.currentDealId) {
       return (
@@ -69,21 +59,22 @@ class App extends Component {
         </View>
       );
     }
-
     const dealsToDisplay =
       this.state.dealsFromSearch.length > 0 ? this.state.dealsFromSearch : this.state.deals;
 
     if (dealsToDisplay.length > 0) {
       return (
         <View style={styles.main}>
-          <SearchBar searchDeals={this.searchDeals} />
+          <SearchBar
+            searchDeals={this.searchDeals}
+            initialSearchTerm={this.state.activeSearchTerm}
+          />
           <DealList deals={dealsToDisplay} onItemPress={this.setCurrentDeal} />
         </View>
       );
     }
-
     return (
-      <Animated.View style={[styles.container, { transform: [{ translateX: this.titleXPos }] }]}>
+      <Animated.View style={[{ left: this.titleXPos }, styles.container]}>
         <Text style={styles.header}>Bakesale</Text>
       </Animated.View>
     );
